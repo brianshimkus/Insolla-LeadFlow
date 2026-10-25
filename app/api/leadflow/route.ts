@@ -3,7 +3,7 @@ import { inputSchema, type LeadResult } from "@/lib/contracts";
 import { fixtures } from "@/lib/fixtures";
 import { missingFields, routeFor } from "@/lib/logic";
 import { presets } from "@/lib/presets";
-import { DemoError, draftReply, extract, openaiClient } from "@/lib/server";
+import { DemoError, draftReply, extract, openaiClient, supabaseClient, verifyHuman } from "@/lib/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -53,11 +53,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const { preset, message } = parsed.data;
+    const { preset, message, turnstileToken } = parsed.data;
     const mode = process.env.LEADFLOW_MODE || "fixture";
 
     if (mode === "live") {
       const openai = openaiClient();
+      const supabase = supabaseClient();
+      await verifyHuman(turnstileToken);
+      const reservation = await supabase.rpc("reserve_leadflow_attempt");
+      if (reservation.error) {
+        throw new DemoError(503, "USAGE_STORE", "The demo is temporarily unavailable.");
+      }
+      if (reservation.data !== true) {
+        throw new DemoError(
+          429,
+          "DEMO_LIMIT",
+          "The demo has reached its shared hourly limit. Please try again next hour.",
+        );
+      }
+
       const extraction = await extract(openai, preset, message);
       const missing = missingFields(preset, extraction);
       const destination = routeFor(extraction.intent);
@@ -65,11 +79,27 @@ export async function POST(request: Request) {
         extraction.intent === "other"
           ? "Manual review needed before drafting a customer reply."
           : await draftReply(openai, preset, extraction, missing);
+      const id = randomUUID();
+      const elapsedMs = Date.now() - started;
+      const saved = await supabase.from("leadflow_leads").insert({
+        id,
+        preset,
+        original_message: message,
+        extraction,
+        missing_fields: missing,
+        route: destination,
+        draft_reply: draft,
+        elapsed_ms: elapsedMs,
+      });
+      if (saved.error) {
+        throw new DemoError(503, "SAVE_FAILED", "The result could not be saved. Please try again; no reply was sent.");
+      }
+
       const result: LeadResult = {
-        id: randomUUID(),
+        id,
         mode: "live",
-        saved: false,
-        elapsedMs: Date.now() - started,
+        saved: true,
+        elapsedMs,
         extraction,
         missing,
         route: destination,

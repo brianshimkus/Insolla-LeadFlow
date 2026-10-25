@@ -1,4 +1,5 @@
 import "server-only";
+import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { extractionSchema, type Extraction, type PresetId } from "./contracts";
@@ -22,6 +23,52 @@ export function openaiClient() {
     throw new DemoError(503, "CONFIGURATION", "The live demo is not configured yet.");
   }
   return new OpenAI({ apiKey, timeout: 20_000, maxRetries: 0 });
+}
+
+export function supabaseClient() {
+  const url = process.env.SUPABASE_URL;
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !secretKey) {
+    throw new DemoError(503, "CONFIGURATION", "The live demo is not configured yet.");
+  }
+  return createClient(url, secretKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+function required(name: string) {
+  const value = process.env[name];
+  if (!value) {
+    throw new DemoError(503, "CONFIGURATION", "The live demo is not configured yet.");
+  }
+  return value;
+}
+
+// Cloudflare tokens are single-use and expire after about five minutes.
+// The widget on the page is not this check. A caller can skip the widget and post a token.
+export async function verifyHuman(token: string | undefined) {
+  const secret = required("TURNSTILE_SECRET_KEY");
+  required("NEXT_PUBLIC_TURNSTILE_SITE_KEY");
+  const allowedHosts = required("TURNSTILE_HOSTNAMES");
+  if (!token) {
+    throw new DemoError(400, "VERIFICATION", "Please complete the verification and try again.");
+  }
+
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ secret, response: token }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) {
+    throw new DemoError(503, "VERIFICATION_UNAVAILABLE", "Verification is temporarily unavailable.");
+  }
+
+  const result = (await response.json()) as { success?: boolean; hostname?: string; action?: string };
+  const hosts = allowedHosts.split(",").map((host) => host.trim());
+  if (!result.success || !result.hostname || !hosts.includes(result.hostname) || result.action !== "leadflow") {
+    throw new DemoError(400, "VERIFICATION", "Verification expired or failed. Please try again.");
+  }
 }
 
 export async function extract(openai: OpenAI, preset: PresetId, message: string) {

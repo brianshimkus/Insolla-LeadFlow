@@ -2,6 +2,30 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## The visitor check
+
+The widget was already on the form. It renders only in live mode, and only when `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. Its action is `leadflow`. After each submit the widget resets, because a token is single-use and lasts about five minutes.
+
+`verifyHuman` runs after the OpenAI and Supabase clients are created, and before `reserve_leadflow_attempt`. A missing or rejected token does not increment the hour and does not call either model. Fixture mode never calls it.
+
+The server posts the token to Cloudflare. It keeps the result only when `success` is true, `action` is `leadflow`, and `hostname` is listed in `TURNSTILE_HOSTNAMES`. The secret stays on the server. Showing the widget is not the check.
+
+A missing Turnstile setting is `CONFIGURATION`. A missing or rejected token is `VERIFICATION`. An HTTP error from Cloudflare is `VERIFICATION_UNAVAILABLE`. A network failure is still `UPSTREAM_FAILURE`, and in that case the counter was not incremented.
+
+Create a managed widget, allow `localhost`, and set the site key, the secret, and `TURNSTILE_HOSTNAMES=localhost` in `.env.local`. Restart `pnpm dev`. The next live submit has to pass the widget.
+
+## The private tracker
+
+`supabase/schema.sql` creates two tables. `leadflow_leads` stores one row per live submission. `status` defaults to `needs_review` because the insert does not send a status. `leadflow_usage` stores one counter per database hour.
+
+Row level security is on, and the browser roles have no permissions. The server connects with `SUPABASE_SECRET_KEY`. That key is not a `NEXT_PUBLIC_` variable.
+
+`reserve_leadflow_attempt` runs before either model call. It adds one to the current hour and allows the attempt when the count is 30 or less. A full hour returns 429 and the model is not called. A broken counter returns 503 and the model is not called. The attempt is counted even when the later model call or the save fails. The bucket is the database hour, not a rolling 60 minutes. The request that hits 31 still increments the counter.
+
+The row is inserted after the draft. `saved: true` is returned only when that insert succeeds. A failed insert is `SAVE_FAILED`, and the page does not say the result was saved. `elapsedMs` stops before the insert, so the number is the time to organize and draft.
+
+Run the SQL once in the Supabase SQL editor. Then set `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` and restart the dev server. The Table Editor is the tracker for this version. There is no page that lists other people's rows.
+
 ## The two model calls
 
 `extract` asks for facts that are short quotes from the message, or `null`. The response has to match `extractionSchema`. `groundExtraction` then runs on that object, so an invented email still becomes `null` after the model returns.
@@ -26,8 +50,9 @@ The wordmark is white in one logo file and dark in the other, so each theme has 
 2. The rules that drop invented facts, list missing fields, and pick a destination.
 3. Prewritten results for the three samples.
 4. The page and the fixture endpoint.
-5. The two model calls. A live result is not saved yet. Done through here.
-6. Supabase, then Turnstile.
+5. The two model calls.
+6. Save the live result in Supabase.
+7. Turnstile, in front of the counter and the model calls. Done through here.
 
 ## The page and the fixture endpoint
 
