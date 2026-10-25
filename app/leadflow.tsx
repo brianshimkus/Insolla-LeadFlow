@@ -27,8 +27,20 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
   const [copied, setCopied] = useState(false);
   const [token, setToken] = useState("");
   const [scriptReady, setScriptReady] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const challenge = useRef<HTMLDivElement>(null);
   const widget = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("insolla-theme", next);
+    setTheme(next);
+  }
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("preset");
@@ -106,17 +118,30 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
         />
       )}
       <nav>
-        <a className="brand" href="https://www.insolla.ai/">
-          INSOLLA<span> / LeadFlow</span>
+        <a className="brand" href="https://www.insolla.ai/" aria-label="Insolla">
+          <img className="logo-on-dark" src="/brand/insolla-logo.svg" alt="Insolla" />
+          <img className="logo-on-light" src="/brand/insolla-logo-light.svg" alt="Insolla" />
         </a>
-        <a href="https://www.insolla.ai/contact">Talk about your workflow ↗</a>
+        <div className="nav-actions">
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+          </button>
+          <a className="contact-link" href="https://www.insolla.ai/contact">
+            Contact
+          </a>
+        </div>
       </nav>
       <header>
-        <p className="eyebrow">LESS SORTING. CLEARER NEXT STEPS.</p>
+        <p className="eyebrow">Less sorting. Clearer next steps.</p>
         <h1>
-          Every inquiry.
+          <span className="accent-blue">Every</span> inquiry.
           <br />
-          <span>A clear next step.</span>
+          <span className="accent-purple">A clear next step.</span>
         </h1>
         <p className="intro">
           Turn a customer message into an organized lead, missing details, and a reply ready for
@@ -250,5 +275,22 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
         <a href="https://www.insolla.ai/contact">Discuss your workflow →</a>
       </footer>
     </main>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M20 14.5A7.5 7.5 0 1 1 9.5 4 6 6 0 0 0 20 14.5z" />
+    </svg>
   );
 }

@@ -2,6 +2,12 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## The Insolla visual system
+
+Colors, type, and the contact button come from insolla.ai. Dark background is `#0d0f14`. Light background is `#f6f7fb`. Headlines use Rajdhani. Body text uses Inter. The button ring is a blue-to-purple gradient, the same treatment as the Contact button on the marketing site.
+
+The wordmark is white in one logo file and dark in the other, so each theme has its own SVG. The choice is stored in `localStorage` under `insolla-theme`.
+
 ## Where we are
 
 1. The contract and the three presets.
