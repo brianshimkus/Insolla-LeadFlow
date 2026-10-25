@@ -209,7 +209,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
                 : "This mode returns a prewritten result for each built-in sample. Configure live mode to process other messages and save lead records."}
             </p>
             {live && <div ref={challenge} />}
-            <button className="primary" disabled={busy || !consent || (live && !token)}>
+            <button className="primary" disabled={busy || !consent || (live && Boolean(siteKey) && !token)}>
               {busy ? "Organizing and drafting…" : live ? "Organize this inquiry →" : "Preview sample result →"}
             </button>
             {error && (
@@ -234,7 +234,11 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
           ) : (
             <>
               <div className="result-status">
-                {result.saved ? "Saved to private demo tracker" : "Sample preview · Not saved"}
+                {result.mode === "fixture"
+                  ? "Sample preview · Not saved"
+                  : result.saved
+                    ? "Saved to private demo tracker"
+                    : "Live result · Not saved"}
                 <span>{(result.elapsedMs / 1000).toFixed(1)}s</span>
               </div>
               <p className="summary">{result.extraction.summary}</p>

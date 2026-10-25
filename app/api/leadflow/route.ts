@@ -3,20 +3,10 @@ import { inputSchema, type LeadResult } from "@/lib/contracts";
 import { fixtures } from "@/lib/fixtures";
 import { missingFields, routeFor } from "@/lib/logic";
 import { presets } from "@/lib/presets";
+import { DemoError, draftReply, extract, openaiClient } from "@/lib/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-class DemoError extends Error {
-  constructor(
-    readonly status: number,
-    readonly code: string,
-    message: string,
-  ) {
-    super(message);
-    this.name = "DemoError";
-  }
-}
 
 function json(body: unknown, status = 200) {
   return Response.json(body, {
@@ -67,7 +57,25 @@ export async function POST(request: Request) {
     const mode = process.env.LEADFLOW_MODE || "fixture";
 
     if (mode === "live") {
-      throw new DemoError(503, "CONFIGURATION", "Live mode is not connected yet.");
+      const openai = openaiClient();
+      const extraction = await extract(openai, preset, message);
+      const missing = missingFields(preset, extraction);
+      const destination = routeFor(extraction.intent);
+      const draft =
+        extraction.intent === "other"
+          ? "Manual review needed before drafting a customer reply."
+          : await draftReply(openai, preset, extraction, missing);
+      const result: LeadResult = {
+        id: randomUUID(),
+        mode: "live",
+        saved: false,
+        elapsedMs: Date.now() - started,
+        extraction,
+        missing,
+        route: destination,
+        draft,
+      };
+      return json(result);
     }
     if (mode !== "fixture") {
       throw new DemoError(503, "CONFIGURATION", "Invalid demo mode.");

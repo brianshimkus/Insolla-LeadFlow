@@ -2,6 +2,18 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## The two model calls
+
+`extract` asks for facts that are short quotes from the message, or `null`. The response has to match `extractionSchema`. `groundExtraction` then runs on that object, so an invented email still becomes `null` after the model returns.
+
+`draftReply` receives the grounded facts and the missing list. It does not see the original message. A message classified as `other` skips this call and gets a fixed manual-review line.
+
+`store: false` asks OpenAI not to keep the response for its own later use. It is not a promise that the provider retains nothing. This app still does not save the row. `saved` stays false until Supabase is connected, and the page says "Live result · Not saved".
+
+Both calls use a 20 second timeout and no automatic retry. A failed call is a 502. The inquiry text is not written to the log.
+
+The preview button waits for a Turnstile token only after `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. Until then, live mode can be tried with an API key alone. Verification still has to move in front of these calls before the demo is public.
+
 ## The Insolla visual system
 
 Colors, type, and the contact button come from insolla.ai. Dark background is `#0d0f14`. Light background is `#f6f7fb`. Headlines use Rajdhani. Body text uses Inter. The button ring is a blue-to-purple gradient, the same treatment as the Contact button on the marketing site.
@@ -13,8 +25,9 @@ The wordmark is white in one logo file and dark in the other, so each theme has 
 1. The contract and the three presets.
 2. The rules that drop invented facts, list missing fields, and pick a destination.
 3. Prewritten results for the three samples.
-4. The page and the fixture endpoint. Done through here.
-5. Live mode, one service at a time: OpenAI, Supabase, then Turnstile.
+4. The page and the fixture endpoint.
+5. The two model calls. A live result is not saved yet. Done through here.
+6. Supabase, then Turnstile.
 
 ## The page and the fixture endpoint
 
