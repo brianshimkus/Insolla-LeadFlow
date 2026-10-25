@@ -10,9 +10,33 @@ const rajdhani = Rajdhani({
   variable: "--font-rajdhani",
 });
 
+const origin = process.env.APP_ORIGIN || "https://leadflow.insolla.ai";
+const description = "Turn an inquiry into an organized lead, missing details, and a reply for review.";
+const image = {
+  url: "/thumbnail.png",
+  width: 1732,
+  height: 908,
+  alt: "LeadFlow turns an inquiry into organized facts, flags a missing email, and drafts a reply for review.",
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(origin),
   title: "Insolla LeadFlow | Inquiry to next step",
-  description: "Turn an inquiry into an organized lead, missing details and a reply for review.",
+  description,
+  openGraph: {
+    title: "Insolla LeadFlow",
+    description,
+    url: origin,
+    siteName: "Insolla LeadFlow",
+    type: "website",
+    images: [image],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Insolla LeadFlow",
+    description,
+    images: [image],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

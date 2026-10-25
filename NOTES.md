@@ -2,6 +2,10 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## The share preview
+
+A pasted link uses the same image as the README, `public/thumbnail.png`. The page sets `og:title`, `og:description`, and `og:image` from `APP_ORIGIN`, so the image address is absolute. LinkedIn and iMessage ignore a title that has no image. After a deploy, those apps can keep an old bare preview until their cache is refreshed.
+
 ## The first screen
 
 The page opens on Taylor’s inquiry. Before a visitor runs anything, panel 02 shows that preset’s prewritten result and labels it as an example. It is not a saved row. For Taylor, the email is missing. Changing the sample business changes the example. Their own run replaces it.
