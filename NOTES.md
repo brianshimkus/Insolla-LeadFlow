@@ -6,10 +6,23 @@ A running log of decisions and surprises while building LeadFlow. Newest entry a
 
 1. The contract and the three presets.
 2. The rules that drop invented facts, list missing fields, and pick a destination.
-3. Prewritten results for the three samples. Done through here.
-4. The page.
-5. The API in fixture mode.
-6. Live mode, one service at a time: OpenAI, Supabase, then Turnstile.
+3. Prewritten results for the three samples.
+4. The page and the fixture endpoint. Done through here.
+5. Live mode, one service at a time: OpenAI, Supabase, then Turnstile.
+
+## The page and the fixture endpoint
+
+`app/page.tsx` runs on the server. It reads `LEADFLOW_MODE` and passes `live` into the form as a prop, along with the Turnstile site key. The browser bundle does not receive the server secrets. `force-dynamic` keeps that read on each request, so a mode change is not frozen into a static page.
+
+`app/leadflow.tsx` is the form. Choosing a business loads that sample. `/?preset=agency` does the same on first load. The checkbox has to be checked before the button will submit. The form POSTs `/api/leadflow`.
+
+In fixture mode the route returns the prewritten extraction and draft only when the message is exactly the sample. The result says `fixture` and `saved: false`. Edited text gets `FIXTURE_ONLY`. A request whose `Origin` is not `APP_ORIGIN` gets `403` before that comparison. During `next dev`, a missing `APP_ORIGIN` falls back to `http://localhost:3000`.
+
+The schema trims the message, so a space at either end still matches the sample.
+
+Live mode does not run yet. If `LEADFLOW_MODE=live`, the route returns `CONFIGURATION` instead of pretending the sample is a live answer. The live badge and the verification widget are already in the form, and they stay inactive while the mode is fixture. The test that expects `503` changes when the live path is real.
+
+The Next.js TypeScript plugin is now in `tsconfig.json`.
 
 ## Prewritten results
 
