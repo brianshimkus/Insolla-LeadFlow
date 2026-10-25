@@ -1,20 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Extraction } from "../lib/contracts";
+import { fixtures } from "../lib/fixtures";
 import { groundExtraction, missingFields, routeFor } from "../lib/logic";
 import { presets } from "../lib/presets";
 
-const taylor: Extraction = {
-  name: "Taylor",
-  email: null,
-  phone: null,
-  service: "website redesign",
-  location: null,
-  timing: "before our January launch",
-  budget: "around $8,000",
-  intent: "new_inquiry",
-  summary:
-    "Taylor from Fieldwork asks about a website redesign for a January launch, with a budget around $8,000.",
-};
+const taylor = fixtures.agency.extraction;
 
 describe("groundExtraction", () => {
   it("keeps a fact when the phrase is in the message", () => {

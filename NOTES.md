@@ -1,8 +1,25 @@
 # Notes
 
-A running log of decisions and surprises while building LeadFlow. Newest entry at the top.
+A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
-## 2026-10-25 — the rules between the two model calls
+## Where we are
+
+1. The contract and the three presets.
+2. The rules that drop invented facts, list missing fields, and pick a destination.
+3. Prewritten results for the three samples. Done through here.
+4. The page.
+5. The API in fixture mode.
+6. Live mode, one service at a time: OpenAI, Supabase, then Turnstile.
+
+## Prewritten results
+
+`lib/fixtures.ts` holds the extraction and the draft for each sample. Fixture mode will return one of these only when the submitted message is exactly that preset's sample. Edited text is rejected. The result is labeled `fixture`, and nothing is saved.
+
+Every quoted fact in these extractions appears in its sample. The test runs `groundExtraction` and expects the object back unchanged. The summaries are allowed to paraphrase. Jordan's stored service is `replace our water heater`, while the summary says "water heater replacement."
+
+The agency result is the one with a gap. Email is null, and the draft asks for an address before anyone confirms pricing or availability. Jordan and Sam already included an email, and budget is not required for their presets, so their missing lists are empty.
+
+## The rules between the two model calls
 
 `lib/logic.ts` runs after extraction and before the draft. Three functions, in that order:
 
@@ -18,16 +35,7 @@ Summary and intent skip that search. The summary is generated text, cut at 700 c
 
 Call `groundExtraction` before `missingFields`. A blank made of spaces is still truthy, so it would not count as missing until grounding turns it into `null`.
 
-## 2026-10-25 — the contract
-
-We are rebuilding the app in this repo, in the order the data flows.
-
-1. The contract and the three presets. Done in this step.
-2. The rules that drop invented facts, list missing fields, and pick a destination.
-3. Prewritten results for the three samples, so the page can run with no accounts.
-4. The page.
-5. The API in fixture mode.
-6. Live mode, one service at a time: OpenAI, Supabase, then Turnstile.
+## The contract
 
 `lib/contracts.ts` has two schemas. `inputSchema` is what the browser may send. `extractionSchema` is what the first model call must return. A fact the model does not know is `null`. The key still has to be present. `summary` and `intent` are always filled in, because those are judgments, not quotes from the message.
 
@@ -37,7 +45,7 @@ The agency preset requires an email, and Taylor's sample has none. That is the o
 
 Dependency versions are pinned to the tutorial's `package.json` and lockfile. The Next.js TypeScript plugin is not in `tsconfig.json` yet. It gets added when the app exists, because it expects Next's generated type files.
 
-## 2026-10-25
+## The product page
 
 The README is a product page. It states the promise, the demo beat, the failure it exists to prevent, the pipeline, the boundary, and the stack. Setup steps stay in the tutorial. Demo links stay empty until a live walkthrough exists.
 
