@@ -1,0 +1,29 @@
+{
+  "name": "insolla-leadflow",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "openai": "7.43.0",
+    "zod": "4.6.7",
+    "@supabase/supabase-js": "2.118.0",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "vitest": "5.0.5"
+  },
+  "packageManager": "pnpm@10.15.1"
+}
