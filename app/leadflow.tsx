@@ -276,7 +276,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
       </div>
       <footer>
         <p>Built by Insolla. Adapt this workflow to your inbox, CRM, and team’s rules.</p>
-        <a href="https://www.insolla.ai/contact">Discuss your workflow →</a>
+        <a href="https://www.insolla.ai/contact">Let’s map how inquiries reach your team today.</a>
       </footer>
     </main>
   );

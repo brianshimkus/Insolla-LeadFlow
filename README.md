@@ -6,7 +6,13 @@ One inquiry. Organized facts. Extract first, then one reply draft.
 
 ## Demo
 
-The short walkthrough and the write-up will be linked here once the demo is live. The opening beat is an agency inquiry from Taylor at Fieldwork: a website redesign before a January launch, budget around $8,000, and no email address. LeadFlow shows those facts, flags the missing email, and drafts a reply that asks for an address without promising the work.
+The live demo is [leadflow.insolla.ai](https://leadflow.insolla.ai). Send one link per business:
+
+- [Home services](https://leadflow.insolla.ai/?preset=home-services)
+- [Agencies](https://leadflow.insolla.ai/?preset=agency)
+- [Real estate](https://leadflow.insolla.ai/?preset=real-estate)
+
+The agency link opens Taylor at Fieldwork: a website redesign before a January launch, a budget around $8,000, and no email. The page flags that missing email and drafts a reply for a person to review. A short recording of that run still goes here.
 
 ## The customer problem
 

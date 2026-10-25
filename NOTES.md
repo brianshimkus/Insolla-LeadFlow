@@ -2,6 +2,16 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## Outreach links
+
+The query string selects the sample. It does not grant access to a prospect’s inbox. The three links are:
+
+- `https://leadflow.insolla.ai/?preset=home-services`
+- `https://leadflow.insolla.ai/?preset=agency`
+- `https://leadflow.insolla.ai/?preset=real-estate`
+
+Use the agency link when the point is the missing email. The footer now says “Let’s map how inquiries reach your team today.” and still goes to `https://www.insolla.ai/contact`, which asks what slows the team down. The nav label stays Contact, matching the marketing site. A 30–45 second recording of the live agency run is still unmade. Email clients cannot run the app, so the message needs the link and a still or a short clip.
+
 ## The public demo
 
 `https://leadflow.insolla.ai` is the live host. DNS is a Namecheap CNAME for `leadflow` to Vercel. `APP_ORIGIN` is that exact origin. The Turnstile widget allows `leadflow.insolla.ai`, and `TURNSTILE_HOSTNAMES` is `localhost,leadflow.insolla.ai`. The three private keys are Production secrets on Vercel. `.env.local` still points local development at `http://localhost:3000`.
@@ -81,7 +91,8 @@ The wordmark is white in one logo file and dark in the other, so each theme has 
 6. Save the live result in Supabase.
 7. Turnstile, in front of the counter and the model calls.
 8. Tests, typecheck, and the production build.
-9. Deploy to `leadflow.insolla.ai`, fixture first, then live. Done through here.
+9. Deploy to `leadflow.insolla.ai`, fixture first, then live.
+10. Outreach links, one preset per message. Done through here. The recording is still unmade.
 
 ## The page and the fixture endpoint
 
