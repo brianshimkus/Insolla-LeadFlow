@@ -2,10 +2,18 @@
 
 import Script from "next/script";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { presetIds, type LeadResult, type PresetId } from "@/lib/contracts";
+import { presetIds, type Extraction, type LeadResult, type PresetId } from "@/lib/contracts";
+import { fixtures } from "@/lib/fixtures";
+import { missingFields, routeFor } from "@/lib/logic";
 import { presets } from "@/lib/presets";
 
 const facts = ["name", "email", "phone", "service", "location", "timing", "budget"] as const;
+
+const exampleName: Record<PresetId, string> = {
+  agency: "Taylor’s inquiry",
+  "home-services": "Jordan’s inquiry",
+  "real-estate": "Sam’s inquiry",
+};
 
 declare global {
   interface Window {
@@ -18,8 +26,8 @@ declare global {
 }
 
 export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: string }) {
-  const [preset, setPreset] = useState<PresetId>("home-services");
-  const [message, setMessage] = useState(presets["home-services"].sample);
+  const [preset, setPreset] = useState<PresetId>("agency");
+  const [message, setMessage] = useState(presets.agency.sample);
   const [consent, setConsent] = useState(false);
   const [result, setResult] = useState<LeadResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -99,9 +107,9 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
     }
   }
 
-  async function copy() {
+  async function copy(text: string) {
     try {
-      await navigator.clipboard.writeText(result?.draft || "");
+      await navigator.clipboard.writeText(text);
       setCopied(true);
     } catch {
       setError("Select the draft text and copy it manually.");
@@ -149,7 +157,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
         </p>
         <div className="badge">
           {live
-            ? "Live AI demo · Private demo tracker"
+            ? "Live demo. Saved for review. No email is sent."
             : "Sample simulation · No AI calls or data storage"}
         </div>
       </header>
@@ -160,7 +168,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
             <h2>The inquiry</h2>
           </div>
           <form onSubmit={submit}>
-            <label htmlFor="preset">Choose a business</label>
+            <label htmlFor="preset">Choose a sample business</label>
             <select
               id="preset"
               value={preset}
@@ -205,7 +213,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
             </label>
             <p className="privacy">
               {live
-                ? "Your message is sent to OpenAI, then the input and result are saved in Insolla’s private demo tracker for review. No email is sent. Use sample data only."
+                ? "Use sample data only. Your message is sent to OpenAI, then the input and result are saved in Insolla’s private demo tracker for review. No email is sent."
                 : "This mode returns a prewritten result for each built-in sample. Configure live mode to process other messages and save lead records."}
             </p>
             {live && <div ref={challenge} />}
@@ -224,61 +232,92 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
             <span className="step">02</span>
             <h2>The next step</h2>
           </div>
-          {!result ? (
+          {busy && !result ? (
             <div className="empty">
-              <div className="empty-symbol">↗</div>
-              <h3>{busy ? "Finding the details…" : "A message becomes a workflow."}</h3>
-              <p>See the lead details, suggested destination, missing information, and a draft reply together.</p>
-              <div className="flow">INQUIRY → LEAD → REVIEW</div>
+              <h3>Finding the details…</h3>
+              <p>Organizing the facts, then drafting a reply for review.</p>
             </div>
           ) : (
-            <>
-              <div className="result-status">
-                {result.mode === "fixture"
-                  ? "Sample preview · Not saved"
-                  : result.saved
-                    ? "Saved to private demo tracker"
-                    : "Live result · Not saved"}
-                <span>{(result.elapsedMs / 1000).toFixed(1)}s</span>
-              </div>
-              <p className="summary">{result.extraction.summary}</p>
-              <dl>
-                {facts.map((key) => (
-                  <div key={key}>
-                    <dt>{key}</dt>
-                    <dd>{result.extraction[key] || "Not provided"}</dd>
-                  </div>
-                ))}
-              </dl>
-              <div className="next">
-                <strong>Suggested destination</strong>
-                <p>{result.route} · Human review required</p>
-                <strong>Missing intake details</strong>
-                <p>
-                  {result.missing.length
-                    ? result.missing.join(", ")
-                    : "Required demo intake fields are present."}
-                </p>
-              </div>
-              <div className="draft">
-                <div className="label-row">
-                  <h3>Reply draft</h3>
-                  <button type="button" className="text-button" onClick={copy}>
-                    {copied ? "Copied" : "Copy draft"}
-                  </button>
-                </div>
-                <p>{result.draft}</p>
-                <small>Review facts and commitments before using this draft.</small>
-              </div>
-            </>
+            <OrganizedInquiry
+              status={
+                result
+                  ? result.mode === "fixture"
+                    ? "Sample preview · Not saved"
+                    : result.saved
+                      ? "Saved to private demo tracker"
+                      : "Live result · Not saved"
+                  : `Example · ${exampleName[preset]}`
+              }
+              time={result ? `${(result.elapsedMs / 1000).toFixed(1)}s` : undefined}
+              extraction={result?.extraction ?? fixtures[preset].extraction}
+              missing={result?.missing ?? missingFields(preset, fixtures[preset].extraction)}
+              route={result?.route ?? routeFor(fixtures[preset].extraction.intent)}
+              draft={result?.draft ?? fixtures[preset].draft}
+              copied={copied}
+              onCopy={() => copy(result?.draft ?? fixtures[preset].draft)}
+            />
           )}
         </section>
       </div>
       <footer>
         <p>Built by Insolla. Adapt this workflow to your inbox, CRM, and team’s rules.</p>
-        <a href="https://www.insolla.ai/contact">Let’s map how inquiries reach your team today.</a>
+        <a href="https://www.insolla.ai/contact">Tell us how inquiries reach your team.</a>
       </footer>
     </main>
+  );
+}
+
+function OrganizedInquiry({
+  status,
+  time,
+  extraction,
+  missing,
+  route,
+  draft,
+  copied,
+  onCopy,
+}: {
+  status: string;
+  time?: string;
+  extraction: Extraction;
+  missing: string[];
+  route: string;
+  draft: string;
+  copied: boolean;
+  onCopy: () => void;
+}) {
+  return (
+    <>
+      <div className="result-status">
+        {status}
+        {time ? <span>{time}</span> : null}
+      </div>
+      <p className="summary">{extraction.summary}</p>
+      <dl>
+        {facts.map((key) => (
+          <div key={key}>
+            <dt>{key}</dt>
+            <dd>{extraction[key] || "Not provided"}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="next">
+        <strong>Suggested destination</strong>
+        <p>{route} · Human review required</p>
+        <strong>Missing intake details</strong>
+        <p>{missing.length ? missing.join(", ") : "Required demo intake fields are present."}</p>
+      </div>
+      <div className="draft">
+        <div className="label-row">
+          <h3>Reply draft</h3>
+          <button type="button" className="text-button" onClick={onCopy}>
+            {copied ? "Copied" : "Copy draft"}
+          </button>
+        </div>
+        <p>{draft}</p>
+        <small>Review facts and commitments before using this draft.</small>
+      </div>
+    </>
   );
 }
 

@@ -2,6 +2,12 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## The first screen
+
+The page opens on Taylor’s inquiry. Before a visitor runs anything, panel 02 shows that preset’s prewritten result and labels it as an example. It is not a saved row. For Taylor, the email is missing. Changing the sample business changes the example. Their own run replaces it.
+
+The live badge says “Live demo. Saved for review. No email is sent.” The selector says “Choose a sample business.” The privacy line leads with “Use sample data only.” The footer says “Tell us how inquiries reach your team.” and opens the Insolla contact form. That form promises a personal reply, usually within a day. It does not book a call.
+
 ## Outreach links
 
 The query string selects the sample. It does not grant access to a prospect’s inbox. The three links are:
@@ -10,7 +16,7 @@ The query string selects the sample. It does not grant access to a prospect’s 
 - `https://leadflow.insolla.ai/?preset=agency`
 - `https://leadflow.insolla.ai/?preset=real-estate`
 
-Use the agency link when the point is the missing email. The footer now says “Let’s map how inquiries reach your team today.” and still goes to `https://www.insolla.ai/contact`, which asks what slows the team down. The nav label stays Contact, matching the marketing site. A 30–45 second recording of the live agency run is still unmade. Email clients cannot run the app, so the message needs the link and a still or a short clip.
+Use the agency link when the point is the missing email. The footer says “Tell us how inquiries reach your team.” and goes to `https://www.insolla.ai/contact`, which asks what slows the team down. The nav label stays Contact, matching the marketing site. A 30–45 second recording of the live agency run is still unmade. Email clients cannot run the app, so the message needs the link and a still or a short clip.
 
 ## The public demo
 
