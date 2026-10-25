@@ -2,6 +2,27 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## Ready to deploy
+
+`pnpm test`, `pnpm typecheck`, and `pnpm build` passed. The suite is 36 tests. The production build marks `/` and `/api/leadflow` as dynamic, so the mode and the origin are read on the server for each request. A green suite does not prove the API key, the database, or Turnstile. Taylor’s live run is that proof on localhost.
+
+A live request runs in this order:
+
+1. Origin and JSON checks. The origin check is not authentication.
+2. Body cap, then preset, length, and the demo-data checkbox.
+3. Live mode, or fixture mode when the message is an exact sample.
+4. OpenAI and Supabase clients, on the server only.
+5. Turnstile, before the counter.
+6. Reserve the hour. A broken or full counter stops the request.
+7. Extract, ground, list what is missing, and pick a destination.
+8. Draft, unless the intent is `other`.
+9. Insert the row. `saved: true` only after that insert succeeds.
+10. Return this result with `Cache-Control: no-store`.
+
+`supabase/schema.sql` is the table definition. It was applied in the dashboard and had not been committed. `.env.local` stays off the remote.
+
+The first deployment should use `LEADFLOW_MODE=fixture` and an `APP_ORIGIN` that is the exact `https` origin. Add that hostname to the Turnstile widget and to `TURNSTILE_HOSTNAMES` before switching the deployment to live. Environment changes on Vercel apply on the next deployment.
+
 ## The visitor check
 
 The widget was already on the form. It renders only in live mode, and only when `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. Its action is `leadflow`. After each submit the widget resets, because a token is single-use and lasts about five minutes.
@@ -52,7 +73,9 @@ The wordmark is white in one logo file and dark in the other, so each theme has 
 4. The page and the fixture endpoint.
 5. The two model calls.
 6. Save the live result in Supabase.
-7. Turnstile, in front of the counter and the model calls. Done through here.
+7. Turnstile, in front of the counter and the model calls.
+8. Tests, typecheck, and the production build. Done through here.
+9. Deploy, first in fixture mode.
 
 ## The page and the fixture endpoint
 
