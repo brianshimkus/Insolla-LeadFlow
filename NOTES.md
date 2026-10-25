@@ -2,6 +2,25 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top.
 
+## 2026-10-25 — the contract
+
+We are rebuilding the app in this repo, in the order the data flows.
+
+1. The contract and the three presets. Done in this step.
+2. The rules that drop invented facts, list missing fields, and pick a destination.
+3. Prewritten results for the three samples, so the page can run with no accounts.
+4. The page.
+5. The API in fixture mode.
+6. Live mode, one service at a time: OpenAI, Supabase, then Turnstile.
+
+`lib/contracts.ts` has two schemas. `inputSchema` is what the browser may send. `extractionSchema` is what the first model call must return. A fact the model does not know is `null`. The key still has to be present. `summary` and `intent` are always filled in, because those are judgments, not quotes from the message.
+
+`.strict()` rejects a request that adds its own field. A caller cannot send `saved: true` and have us trust it.
+
+The agency preset requires an email, and Taylor's sample has none. That is the opening beat in the README. The test locks it in.
+
+Dependency versions are pinned to the tutorial's `package.json` and lockfile. The Next.js TypeScript plugin is not in `tsconfig.json` yet. It gets added when the app exists, because it expects Next's generated type files.
+
 ## 2026-10-25
 
 The README is a product page. It states the promise, the demo beat, the failure it exists to prevent, the pipeline, the boundary, and the stack. Setup steps stay in the tutorial. Demo links stay empty until a live walkthrough exists.
