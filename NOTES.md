@@ -2,6 +2,12 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## The public demo
+
+`https://leadflow.insolla.ai` is the live host. DNS is a Namecheap CNAME for `leadflow` to Vercel. `APP_ORIGIN` is that exact origin. The Turnstile widget allows `leadflow.insolla.ai`, and `TURNSTILE_HOSTNAMES` is `localhost,leadflow.insolla.ai`. The three private keys are Production secrets on Vercel. `.env.local` still points local development at `http://localhost:3000`.
+
+Taylor’s public run saved in 3.9 seconds. Email was null and the missing list was `email`. The draft asked about scope, features, and timeline, and did not ask for the email. The missing list is the code. The draft is the model, and a person still has to read it. `Fieldwork` was stored as the location again because the word is in the message.
+
 ## Ready to deploy
 
 `pnpm test`, `pnpm typecheck`, and `pnpm build` passed. The suite is 36 tests. The production build marks `/` and `/api/leadflow` as dynamic, so the mode and the origin are read on the server for each request. A green suite does not prove the API key, the database, or Turnstile. Taylor’s live run is that proof on localhost.
@@ -74,8 +80,8 @@ The wordmark is white in one logo file and dark in the other, so each theme has 
 5. The two model calls.
 6. Save the live result in Supabase.
 7. Turnstile, in front of the counter and the model calls.
-8. Tests, typecheck, and the production build. Done through here.
-9. Deploy, first in fixture mode.
+8. Tests, typecheck, and the production build.
+9. Deploy to `leadflow.insolla.ai`, fixture first, then live. Done through here.
 
 ## The page and the fixture endpoint
 
