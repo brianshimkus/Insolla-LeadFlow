@@ -2,6 +2,22 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top.
 
+## 2026-10-25 — the rules between the two model calls
+
+`lib/logic.ts` runs after extraction and before the draft. Three functions, in that order:
+
+1. `groundExtraction` keeps a fact only when its phrase appears in the message. Case and extra spaces do not matter. The stored phrase stays as the model wrote it.
+2. `missingFields` walks that preset's required list and keeps the keys that are still empty.
+3. `routeFor` maps intent to a queue name. The map is fixed: new inquiries, client services, or manual review.
+
+`$8000` is dropped from Taylor's message because the customer wrote `$8,000`. The check is a string search, so a fair paraphrase still loses.
+
+`Fieldwork` stored as the location is kept. The word is in the message, and the check does not know what a location is. A phrase can be real and still be on the wrong field.
+
+Summary and intent skip that search. The summary is generated text, cut at 700 characters. Intent is a classification, then a queue label.
+
+Call `groundExtraction` before `missingFields`. A blank made of spaces is still truthy, so it would not count as missing until grounding turns it into `null`.
+
 ## 2026-10-25 — the contract
 
 We are rebuilding the app in this repo, in the order the data flows.
