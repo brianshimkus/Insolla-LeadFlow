@@ -49,6 +49,7 @@ main {
   max-width: 1180px;
   margin: auto;
   padding: 0 36px;
+  text-wrap: pretty;
 }
 
 a {

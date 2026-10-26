@@ -3,17 +3,9 @@
 import Script from "next/script";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { presetIds, type Extraction, type LeadResult, type PresetId } from "@/lib/contracts";
-import { fixtures } from "@/lib/fixtures";
-import { missingFields, routeFor } from "@/lib/logic";
 import { presets } from "@/lib/presets";
 
 const facts = ["name", "email", "phone", "service", "location", "timing", "budget"] as const;
-
-const exampleName: Record<PresetId, string> = {
-  agency: "Taylor’s inquiry",
-  "home-services": "Jordan’s inquiry",
-  "real-estate": "Sam’s inquiry",
-};
 
 declare global {
   interface Window {
@@ -27,7 +19,7 @@ declare global {
 
 export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: string }) {
   const [preset, setPreset] = useState<PresetId>("agency");
-  const [message, setMessage] = useState(presets.agency.sample);
+  const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
   const [result, setResult] = useState<LeadResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -52,10 +44,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("preset");
-    if (id && presetIds.includes(id as PresetId)) {
-      setPreset(id as PresetId);
-      setMessage(presets[id as PresetId].sample);
-    }
+    if (id && presetIds.includes(id as PresetId)) setPreset(id as PresetId);
   }, []);
 
   useEffect(() => {
@@ -72,9 +61,15 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
     };
   }, [live, siteKey, scriptReady]);
 
-  function load(id: PresetId) {
+  function choose(id: PresetId) {
     setPreset(id);
-    setMessage(presets[id].sample);
+    setResult(null);
+    setError("");
+    setCopied(false);
+  }
+
+  function loadSample() {
+    setMessage(presets[preset].sample);
     setResult(null);
     setError("");
     setCopied(false);
@@ -173,7 +168,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
               id="preset"
               value={preset}
               disabled={busy}
-              onChange={(event) => load(event.target.value as PresetId)}
+              onChange={(event) => choose(event.target.value as PresetId)}
             >
               {presetIds.map((id) => (
                 <option key={id} value={id}>
@@ -183,7 +178,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
             </select>
             <div className="label-row">
               <label htmlFor="message">Customer message</label>
-              <button type="button" className="text-button" disabled={busy} onClick={() => load(preset)}>
+              <button type="button" className="text-button" disabled={busy} onClick={loadSample}>
                 Load sample
               </button>
             </div>
@@ -199,6 +194,7 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
               rows={9}
               disabled={busy}
               required
+              placeholder="Paste a customer inquiry, or load a sample."
             />
             <p className="hint">{message.length}/4,000 characters · Fictional businesses and sample inquiries</p>
             <label className="check">
@@ -232,30 +228,32 @@ export default function LeadFlow({ live, siteKey }: { live: boolean; siteKey: st
             <span className="step">02</span>
             <h2>The next step</h2>
           </div>
-          {busy && !result ? (
-            <div className="empty">
-              <h3>Finding the details…</h3>
-              <p>Organizing the facts, then drafting a reply for review.</p>
-            </div>
-          ) : (
+          {result ? (
             <OrganizedInquiry
               status={
-                result
-                  ? result.mode === "fixture"
-                    ? "Sample preview · Not saved"
-                    : result.saved
-                      ? "Saved to private demo tracker"
-                      : "Live result · Not saved"
-                  : `Example · ${exampleName[preset]}`
+                result.mode === "fixture"
+                  ? "Sample preview · Not saved"
+                  : result.saved
+                    ? "Saved to private demo tracker"
+                    : "Live result · Not saved"
               }
-              time={result ? `${(result.elapsedMs / 1000).toFixed(1)}s` : undefined}
-              extraction={result?.extraction ?? fixtures[preset].extraction}
-              missing={result?.missing ?? missingFields(preset, fixtures[preset].extraction)}
-              route={result?.route ?? routeFor(fixtures[preset].extraction.intent)}
-              draft={result?.draft ?? fixtures[preset].draft}
+              time={`${(result.elapsedMs / 1000).toFixed(1)}s`}
+              extraction={result.extraction}
+              missing={result.missing}
+              route={result.route}
+              draft={result.draft}
               copied={copied}
-              onCopy={() => copy(result?.draft ?? fixtures[preset].draft)}
+              onCopy={() => copy(result.draft)}
             />
+          ) : (
+            <div className="empty">
+              <h3>{busy ? "Finding the details…" : "A message becomes a workflow."}</h3>
+              <p>
+                {busy
+                  ? "Organizing the facts, then drafting a reply for review."
+                  : "The lead details, missing information, and reply draft show here after you organize the inquiry."}
+              </p>
+            </div>
           )}
         </section>
       </div>

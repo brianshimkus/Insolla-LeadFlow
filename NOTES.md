@@ -8,7 +8,7 @@ A pasted link uses the same image as the README, `public/thumbnail.png`. The pag
 
 ## The first screen
 
-The page opens on Taylor’s inquiry. Before a visitor runs anything, panel 02 shows that preset’s prewritten result and labels it as an example. It is not a saved row. For Taylor, the email is missing. Changing the sample business changes the example. Their own run replaces it.
+The page opens with an empty message and an empty result. **Load sample** fills only the message for the selected business. The right column stays empty until that inquiry is organized. A `?preset=` link selects the business and does not paste the sample. Body text uses `text-wrap: pretty`, so a wrapped paragraph does not leave one word on the last line.
 
 The live badge says “Live demo. Saved for review. No email is sent.” The selector says “Choose a sample business.” The privacy line leads with “Use sample data only.” The footer says “Tell us how inquiries reach your team.” and opens the Insolla contact form. That form promises a personal reply, usually within a day. It does not book a call.
 
