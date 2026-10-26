@@ -2,6 +2,10 @@
 
 A running log of decisions and surprises while building LeadFlow. Newest entry at the top. This build is October 25, 2026.
 
+## Page views
+
+Vercel Web Analytics counts visits. The script is `<Analytics />` from `@vercel/analytics` 2.0.1 in the root layout. It does not run during `pnpm dev`, and it does not send the inquiry text. Counts show up after the next production deploy. A content blocker can hide them.
+
 ## The share preview
 
 A pasted link uses the same image as the README, `public/thumbnail.png`. The page sets `og:title`, `og:description`, and `og:image` from `APP_ORIGIN`, so the image address is absolute. LinkedIn and iMessage ignore a title that has no image. After a deploy, those apps can keep an old bare preview until their cache is refreshed.

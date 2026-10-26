@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter, Rajdhani } from "next/font/google";
 import Script from "next/script";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`try{var t=localStorage.getItem("insolla-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}`}
         </Script>
         {children}
+        <Analytics />
       </body>
     </html>
   );
